@@ -52,6 +52,13 @@ void toggleTimerCallback() noexcept { mySys->handleToggleTimerInterrupt(); }
  */
 int main()
 {
+    // Obtain a reference to the singleton serial device instance.
+    auto& serial{Serial::getInstance()};
+    serial.setEnabled(true);
+
+    serial.printf("Hello, I'm Sebastian!\n");
+
+
     // Initialize the GPIO devices.
     Gpio led{8U, Gpio::Direction::Output};
     Gpio button{13U, Gpio::Direction::InputPullup, buttonCallback};
@@ -59,9 +66,6 @@ int main()
     // Initialize the timers.
     Timer debounceTimer{300U, debounceTimerCallback};
     Timer toggleTimer{100U, toggleTimerCallback};
-
-    // Obtain a reference to the singleton serial device instance.
-    auto& serial{Serial::getInstance()};
 
     // Obtain a reference to the singleton watchdog timer instance.
     auto& watchdog{Watchdog::getInstance()};
