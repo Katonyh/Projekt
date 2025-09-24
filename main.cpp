@@ -56,7 +56,7 @@ int main()
     auto& serial{Serial::getInstance()};
     serial.setEnabled(true);
 
-    serial.printf("Hello, I'm Sebastian!\n");
+    serial.printf("Machine learning project!\n");
 
 
     // Initialize the GPIO devices.
