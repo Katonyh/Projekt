@@ -82,14 +82,15 @@ int main()
     ml::lin_reg::LinReg model{trainInput, trainOutput};
 
     // Träna modellen här.
-    const bool trained = model.train(500, 0.01);
-    serial.printf("Training %s\n", trained ? "ok" : "not ok");  
+    const bool trained = model.train(500, 0.1);
+    
 
     for (const auto& input : trainInput)
     {
         const double prediction{model.predict(input)};
+        const auto mV{input * 1000.0};
 
-        serial.printf("Input: %d, predicted output: %d!\n", round(input), round(prediction));
+        serial.printf("Input: %d mV, predicted output: %d!\n", round(mV), round(prediction));
     }
 
 

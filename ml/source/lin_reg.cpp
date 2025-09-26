@@ -38,8 +38,8 @@ bool LinReg::train(unsigned int epochCount, double learningRate){
         for(size_t i{0U}; i < myTrainSetCount; i++){
             const double x   = myTrainInput[i];
             const double y   = myTrainOutput[i];
-            const double yhat= myWeight * x + myBias;
-            const double e   = yhat - y;
+            const double yref= myWeight * x + myBias;
+            const double e   = yref - y;
             
             gradW += e * x;
             gradB += e;
