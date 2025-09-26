@@ -9,14 +9,17 @@
  *            - An EEPROM stream is used to store the LED state. On startup, this value is read;
  *              if the last stored state before power down was "on," the LED will automatically blink.
  */
+#include "container/vector.h"
 #include "driver/atmega328p/adc.h"
 #include "driver/atmega328p/eeprom.h"
 #include "driver/atmega328p/gpio.h"
 #include "driver/atmega328p/serial.h"
 #include "driver/atmega328p/timer.h"
 #include "driver/atmega328p/watchdog.h"
+#include "ml/lin_reg/lin_reg.h"
 #include "target/system.h"
 
+using namespace container;
 using namespace driver::atmega328p;
 
 namespace
@@ -43,6 +46,16 @@ void debounceTimerCallback() noexcept { mySys->handleDebounceTimerInterrupt(); }
  */
 void toggleTimerCallback() noexcept { mySys->handleToggleTimerInterrupt(); }
 
+constexpr int round(const double number)
+{
+    // Round to the nearest integer - 2.7 is rounded to 3, 2.2 is rounded to 2, 
+    // and -2.4 is rounded to 2.
+
+    // number = 2.7 => we add 0.5 => 3.2. Then 3.2 is converted to int, i.e. the decimal part
+    // truncated => the result is 3.
+    return 0.0 <= number ? static_cast<int>(number + 0.5) : static_cast<int>(number - 0.5);
+}
+
 } // namespace
 
 /**
@@ -57,6 +70,25 @@ int main()
     serial.setEnabled(true);
 
     serial.printf("Machine learning project!\n");
+
+    // Input voltage 0 - 5 V.
+    const Vector<double> trainInput{0.0, 0.1, 0.2};
+
+    // To till 7 - 12 till sådana.
+
+    // Expected temperature in Celsius; T = 100 * Vin - 50.
+    const Vector<double> trainOutput{-50.0, -40.0, -30.0};
+
+    ml::lin_reg::LinReg model{trainInput, trainOutput};
+
+    // Träna modellen här.
+
+    for (const auto& input : trainInput)
+    {
+        const double prediction{model.predict(input)};
+
+        serial.printf("Input: %d, predicted output: %d!\n", round(input), round(prediction));
+    }
 
 
     // Initialize the GPIO devices.
