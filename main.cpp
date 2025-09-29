@@ -24,6 +24,32 @@ using namespace driver::atmega328p;
 
 namespace
 {
+
+// Vref = 5.0 V och 10-bitars ADC (0-1023)
+static constexpr double VREF = 5.0;
+static constexpr double ADC_MAX = 1023.0;
+
+// ADC till volt
+static inline double adcToVoltage(uint16_t raw) noexcept {
+    return (static_cast<double>(raw) / ADC_MAX) * VREF;
+}
+
+// Volt till C för TMP36
+static inline double voltageToTemp(double u_in) noexcept {
+    return 100.0 * u_in - 50.0;
+}
+
+// Läs ADC, omvandla till volt, predicera temp med modellen och skriv ut
+static inline void predictAndPrint(driver::atmega328p::Adc& adc,
+                                   ml::lin_reg::LinReg& model,
+                                   driver::atmega328p::Serial& serial) {
+    const uint16_t raw = adc.read(driver::atmega328p::Adc::Pin::A0); 0-1023
+    const double   u   = adcToVoltage(raw);     // volt
+    const double   t   = model.predict(u);      // modellens prediktion i C
+    serial.printf("ADC:%u  U_in:%.3f V  Pred: %.2f C\n", raw, u, t);
+}
+
+
 /** Pointer to the system implementation. */
 target::System* mySys{nullptr};
 
