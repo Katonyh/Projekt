@@ -9,10 +9,20 @@
 #include "driver/serial/interface.h"
 #include "driver/timer/interface.h"
 #include "driver/watchdog/interface.h"
+#include "ml/lin_reg/interface.h"
 #include "target/system.h"
 
 namespace target
 {
+namespace
+{
+// -----------------------------------------------------------------------------
+constexpr int round(const double number)
+{
+    return 0.0 <= number ? static_cast<int>(number + 0.5) : static_cast<int>(number - 0.5);
+}
+} // namespace
+
 /**
  * @brief Structure of LED state parameters.
  */
@@ -29,7 +39,8 @@ namespace LedState
 System::System(driver::GpioInterface& led, driver::GpioInterface& button,
                driver::TimerInterface& debounceTimer, driver::TimerInterface& toggleTimer,
                driver::SerialInterface& serial, driver::WatchdogInterface& watchdog,
-               driver::EepromInterface& eeprom, driver::AdcInterface& adc) noexcept
+               driver::EepromInterface& eeprom, driver::AdcInterface& adc,
+               ml::lin_reg::Interface& model, const uint8_t tempSensorPin) noexcept
     : myLed{led}
     , myButton{button}
     , myDebounceTimer{debounceTimer}
@@ -38,11 +49,14 @@ System::System(driver::GpioInterface& led, driver::GpioInterface& button,
     , myWatchdog{watchdog}
     , myEeprom{eeprom}
     , myAdc{adc}
+    , myModel{model}
+    , myTempSensorPin{tempSensorPin}
 {
     myButton.enableInterrupt(true);
     mySerial.setEnabled(true);
     myWatchdog.setEnabled(true);
     myEeprom.setEnabled(true);
+    myAdc.setEnabled(true);
     checkLedStateInEeprom();
 }
 
@@ -102,12 +116,7 @@ void System::handleButtonPressed() noexcept
     myToggleTimer.toggle();
     writeLedStateToEeprom();
 
-    if (myToggleTimer.isEnabled()) { mySerial.printf("Toggle timer enabled!\n"); }
-    else
-    {
-        mySerial.printf("Toggle timer disabled!\n");
-        myLed.write(false);
-    }
+    predictTemperature();
 }
 
 // -----------------------------------------------------------------------------
@@ -131,5 +140,14 @@ bool System::readLedStateFromEeprom() const noexcept
 {
     uint8_t state{};
     return myEeprom.read(LedState::address, state) ? LedState::enabled == state : false;
+}
+
+// -----------------------------------------------------------------------------
+void System::predictTemperature() const noexcept
+{
+    const auto inputVoltage{myAdc.inputVoltage(myTempSensor)};
+    const auto mV{inputVoltage * 1000.0};
+    const double predictedTemp{model.predict(inputVoltage)};
+    mySerial.printf("Input: %d mV, predicted output: %d!\n", round(mV), round(predictedTemp));
 }
 } // namespace target
