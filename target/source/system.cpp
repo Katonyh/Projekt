@@ -95,7 +95,8 @@ void System::handleDebounceTimerInterrupt() noexcept
 void System::handleToggleTimerInterrupt() noexcept 
 { 
     mySerial.printf("Toggling the LED!\n");
-    myLed.toggle(); 
+    myLed.toggle();
+    predictTemperature(); 
 }
 
 // -----------------------------------------------------------------------------
@@ -145,9 +146,9 @@ bool System::readLedStateFromEeprom() const noexcept
 // -----------------------------------------------------------------------------
 void System::predictTemperature() const noexcept
 {
-    const auto inputVoltage{myAdc.inputVoltage(myTempSensor)};
+    const auto inputVoltage{myAdc.inputVoltage(myTempSensorPin)};
     const auto mV{inputVoltage * 1000.0};
-    const double predictedTemp{model.predict(inputVoltage)};
+    const double predictedTemp{myModel.predict(inputVoltage)};
     mySerial.printf("Input: %d mV, predicted output: %d!\n", round(mV), round(predictedTemp));
 }
 } // namespace target

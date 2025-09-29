@@ -29,8 +29,6 @@ bool LinReg::train(unsigned int epochCount, double learningRate){
     if(epochCount == 0)         return false;
     if(learningRate <= 0.0)     return false;
     
-    const double invN=1.0 /static_cast<double>(myTrainSetCount);
-    
     for (unsigned int epoch = 0; epoch < epochCount; epoch++){
         double gradW = 0.0;
         double gradB = 0.0;
@@ -44,8 +42,9 @@ bool LinReg::train(unsigned int epochCount, double learningRate){
             gradW += e * x;
             gradB += e;
         }
-        gradW *= invN;
-        gradB *= invN;
+        const double scale = 2.0 / static_cast<double>(myTrainSetCount);
+        gradW *= scale;
+        gradB *= scale;
         
         myWeight -= learningRate * gradW;
         myBias   -= learningRate * gradB;

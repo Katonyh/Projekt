@@ -13,7 +13,7 @@ target/source/system.d target/source/system.o: \
  c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stdarg.h \
  ../driver/include/driver/timer/interface.h \
  ../driver/include/driver/watchdog/interface.h \
- ../target/include/target/system.h
+ ../ml/include/ml/lin_reg/interface.h ../target/include/target/system.h
 
 c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stdint.h:
 
@@ -40,5 +40,7 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\
 ../driver/include/driver/timer/interface.h:
 
 ../driver/include/driver/watchdog/interface.h:
+
+../ml/include/ml/lin_reg/interface.h:
 
 ../target/include/target/system.h:
