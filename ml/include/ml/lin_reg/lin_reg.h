@@ -3,7 +3,7 @@
 #include "container/vector.h"
 #include "ml/lin_reg/interface.h"
 
-/**Deklaration av LinReg, en enkel linj�r regressionsmodell */
+/**Declaration of LinReg, */
 namespace ml{
 namespace lin_reg{
 
@@ -13,36 +13,36 @@ class LinReg final : public Interface {
 
 public:
     /*
-    skapar en modell med tr�ningsdata
-    trainInput referens till en const vektor med idata (x)
-    trainOutput referens till en const vektor med utdata (y)
+    creat a model for training data.
+    trainInput reference to a const vector with input data (x)
+    trainOutput reference to a const vector with output data (y)
     */
     explicit LinReg(const Vector<double>& trainInput, 
         const Vector<double>& trainOutput) noexcept;
 
-    /*virtuell destruktor som �verlagrar interfacets destruktor*/
+    /*virtual destructor that saves over the interface destructor*/
     ~LinReg() noexcept override = default;
 
-    /*G�r en prediktion */
+    /*make a prediction */
     double predict(double input) const override;
 
-    /*tr�nar modellen i ett antal epoker och ger en l�rhastighet p� 1%*/
+    /*trains the model in a set number of epochs with a learning rate of 1%*/
     bool train(unsigned int epochCount, double learningRate = 0.01);
 
-    LinReg() = delete;                          // ingen default-konstruktor
-    LinReg(const LinReg&) = delete;             // ingen kopiering (konstruktor)
-    LinReg& operator=(const LinReg&) = delete;  // ingen kopiering (tilldelning)
-    LinReg(LinReg&&) = delete;                  // ingen flytt (konstrukto)    
-    LinReg& operator=(LinReg&&) = delete;       // ingen flytt (tilldelning)
+    LinReg() = delete;                          // no default-constructor
+    LinReg(const LinReg&) = delete;             // no copying(constructor)
+    LinReg& operator=(const LinReg&) = delete;  // no copying(allocation)
+    LinReg(LinReg&&) = delete;                  // no moving the (constructor)    
+    LinReg& operator=(LinReg&&) = delete;       // no moving the(allocation)
 
 private:
-    /*tr�ningsdata*/
+    /*training data*/
     const Vector<double>& myTrainInput;
     const Vector<double>& myTrainOutput;
 
     const size_t myTrainSetCount;
 
-    /* Bias = m och weight = k v�rdet i y= kx + m */
+    /* Bias = m and weight = k value i y= kx + m */
     double myWeight;
     double myBias;
 };

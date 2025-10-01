@@ -65,7 +65,7 @@ public:
      * @param[in] serial Serial device used to print status messages.
      * @param[in] watchdog Watchdog timer that resets the program if it becomes unresponsive.
      * @param[in] eeprom EEPROM stream to write the status of the LED to EEPROM.
-     * @param[in] adc ADC (currently unused).
+     * @param[in] adc ADC .
      * @param[in] model Linear regression model for temperature prediction.
      * @param[in] tempSensorPin Temperature sensor pin.
      */
@@ -147,7 +147,7 @@ private:
     /** EEPROM stream to write the status of the LED to EEPROM. */
     driver::EepromInterface& myEeprom;
 
-    /** A/D converter (currently unused). */
+    /** A/D converter . */
     driver::AdcInterface& myAdc;
 
     /** Linear regression model for temperature prediction. */

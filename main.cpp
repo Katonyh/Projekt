@@ -74,14 +74,12 @@ int main()
     // Input voltage 0 - 5 V.
     const Vector<double> trainInput{0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
 
-    // To till 7 - 12 till sådana.
-
     // Expected temperature in Celsius; T = 100 * Vin - 50.
     const Vector<double> trainOutput{-50.0, -40.0, -30.0, -20.0, -10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0};
 
     ml::lin_reg::LinReg model{trainInput, trainOutput};
 
-    // Träna modellen här.
+    // trains the model here.
     const bool trained = model.train(2000, 0.1);
     
     // This constant might be used later, so save it for now.
