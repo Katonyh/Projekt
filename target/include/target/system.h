@@ -61,7 +61,7 @@ public:
      * @param[in] led The LED to toggle.
      * @param[in] button Button used to toggle the toggle timer.
      * @param[in] debounceTimer Timer used to mitigate effects of contact bounces.
-     * @param[in] toggleTimer Timer used to toggle the LED.
+     * @param[in] predictTimer Timer used to toggle the LED.
      * @param[in] serial Serial device used to print status messages.
      * @param[in] watchdog Watchdog timer that resets the program if it becomes unresponsive.
      * @param[in] eeprom EEPROM stream to write the status of the LED to EEPROM.
@@ -70,7 +70,7 @@ public:
      * @param[in] tempSensorPin Temperature sensor pin.
      */
     explicit System(driver::GpioInterface& led, driver::GpioInterface& button, 
-                    driver::TimerInterface& debounceTimer, driver::TimerInterface& toggleTimer,
+                    driver::TimerInterface& debounceTimer, driver::TimerInterface& predictTimer,
                     driver::SerialInterface& serial, driver::WatchdogInterface& watchdog, 
                     driver::EepromInterface& eeprom, driver::AdcInterface& adc,
                     ml::lin_reg::Interface& model, const uint8_t tempSensorPin) noexcept;
@@ -109,7 +109,7 @@ public:
      * 
      *        Toggle the LED every 100 ms when the associated timer is enabled.
      */
-    void handleToggleTimerInterrupt() noexcept;
+    void handlePredictTimerInterrupt() noexcept;
 
     /**
      * @brief Run the system as long as voltage is supplied.                                                               
@@ -124,9 +124,6 @@ public:
 
 private:
     void handleButtonPressed() noexcept;
-    void checkLedStateInEeprom() noexcept;
-    void writeLedStateToEeprom() noexcept;
-    bool readLedStateFromEeprom() const noexcept;
     void predictTemperature() const noexcept;
 
     /** Reference to the LED to toggle. */
@@ -139,7 +136,7 @@ private:
     driver::TimerInterface& myDebounceTimer;
 
     /** Timer used to toggle the LED. */
-    driver::TimerInterface& myToggleTimer;
+    driver::TimerInterface& myPredictTimer;
 
     /** Serial device used to print status messages. */
     driver::SerialInterface& mySerial;

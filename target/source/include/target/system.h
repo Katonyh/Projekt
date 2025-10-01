@@ -24,6 +24,15 @@ class TimerInterface;
 class WatchdogInterface;
 } // namespace driver
 
+namespace ml
+{
+namespace lin_reg
+{
+/** Linear regression implementation. */
+class Interface;
+} // namespace lin_reg
+} // namespace ml
+
 namespace target
 {
 /**
@@ -49,7 +58,7 @@ public:
     /**
      * @brief Create a new system.
      *     
-     * @param[in] led The LED to toggle.
+     * @param[in] led LED (currently unused).
      * @param[in] button Button used to toggle the toggle timer.
      * @param[in] debounceTimer Timer used to mitigate effects of contact bounces.
      * @param[in] toggleTimer Timer used to toggle the LED.
@@ -61,7 +70,8 @@ public:
     explicit System(driver::GpioInterface& led, driver::GpioInterface& button, 
                     driver::TimerInterface& debounceTimer, driver::TimerInterface& toggleTimer,
                     driver::SerialInterface& serial, driver::WatchdogInterface& watchdog, 
-                    driver::EepromInterface& eeprom, driver::AdcInterface& adc) noexcept;
+                    driver::EepromInterface& eeprom, driver::AdcInterface& adc,
+                    ml::lin_reg::Interface& model, const uint8_t tempSensorPin) noexcept;
 
     /**
      * @brief Delete system.
@@ -112,9 +122,6 @@ public:
 
 private:
     void handleButtonPressed() noexcept;
-    void checkLedStateInEeprom() noexcept;
-    void writeLedStateToEeprom() noexcept;
-    bool readLedStateFromEeprom() const noexcept;
 
     /** Reference to the LED to toggle. */
     driver::GpioInterface& myLed;

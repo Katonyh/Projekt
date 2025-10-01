@@ -44,7 +44,7 @@ void debounceTimerCallback() noexcept { mySys->handleDebounceTimerInterrupt(); }
  * 
  *        This callback is invoked whenever the toggle timer elapses.
  */
-void toggleTimerCallback() noexcept { mySys->handleToggleTimerInterrupt(); }
+void predictTimerCallback() noexcept { mySys->handlePredictTimerInterrupt(); }
 
 constexpr int round(const double number)
 {
@@ -82,7 +82,10 @@ int main()
     ml::lin_reg::LinReg model{trainInput, trainOutput};
 
     // Träna modellen här.
-    const bool trained = model.train(500, 0.1);
+    const bool trained = model.train(2000, 0.1);
+    
+    // This constant might be used later, so save it for now.
+    (void) (trained);
     
 
     for (const auto& input : trainInput)
@@ -101,7 +104,7 @@ int main()
 
     // Initialize the timers.
     Timer debounceTimer{300U, debounceTimerCallback};
-    Timer toggleTimer{60000UL, toggleTimerCallback};
+    Timer predictTimer{6000UL, predictTimerCallback};
 
     // Obtain a reference to the singleton watchdog timer instance.
     auto& watchdog{Watchdog::getInstance()};
@@ -113,7 +116,8 @@ int main()
     auto& adc{Adc::getInstance()};
 
     // Initialize the system with the given hardware.
-    target::System system{led, button, debounceTimer, toggleTimer, serial, watchdog, eeprom, adc, model, tempSensorPin};
+    target::System system{led, button, debounceTimer, predictTimer, 
+        serial, watchdog, eeprom, adc, model, tempSensorPin};
     mySys = &system;
 
     // Run the system perpetually on the target MCU.

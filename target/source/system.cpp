@@ -17,23 +17,11 @@ namespace target
 namespace
 {
 // -----------------------------------------------------------------------------
-constexpr int round(const double number)
+constexpr int round(const double number) noexcept
 {
     return 0.0 <= number ? static_cast<int>(number + 0.5) : static_cast<int>(number - 0.5);
 }
 } // namespace
-
-/**
- * @brief Structure of LED state parameters.
- */
-namespace LedState
-{
-    /** LED state address in EEPROM. */
-    static constexpr uint8_t address{0U};
-
-    /** Enabled state value in EEPROM. */
-    static constexpr uint8_t enabled{1U};
-};
 
 // -----------------------------------------------------------------------------
 System::System(driver::GpioInterface& led, driver::GpioInterface& button,
@@ -44,7 +32,7 @@ System::System(driver::GpioInterface& led, driver::GpioInterface& button,
     : myLed{led}
     , myButton{button}
     , myDebounceTimer{debounceTimer}
-    , myToggleTimer{toggleTimer}
+    , myPredictTimer{toggleTimer}
     , mySerial{serial}
     , myWatchdog{watchdog}
     , myEeprom{eeprom}
@@ -55,9 +43,8 @@ System::System(driver::GpioInterface& led, driver::GpioInterface& button,
     myButton.enableInterrupt(true);
     mySerial.setEnabled(true);
     myWatchdog.setEnabled(true);
-    myEeprom.setEnabled(true);
     myAdc.setEnabled(true);
-    checkLedStateInEeprom();
+    myPredictTimer.start();
 }
 
 // -----------------------------------------------------------------------------
@@ -66,7 +53,7 @@ System::~System() noexcept
     myLed.write(false);
     myButton.enableInterrupt(false);
     myDebounceTimer.stop();
-    myToggleTimer.stop();
+    myPredictTimer.stop();
     myWatchdog.setEnabled(false);
 }
 
@@ -92,10 +79,8 @@ void System::handleDebounceTimerInterrupt() noexcept
 }
 
 // -----------------------------------------------------------------------------
-void System::handleToggleTimerInterrupt() noexcept 
+void System::handlePredictTimerInterrupt() noexcept 
 { 
-    mySerial.printf("Toggling the LED!\n");
-    myLed.toggle();
     predictTemperature(); 
 }
 
@@ -114,33 +99,10 @@ void System::run() noexcept
 void System::handleButtonPressed() noexcept
 {
     mySerial.printf("Button pressed!\n");
-    myToggleTimer.toggle();
-    writeLedStateToEeprom();
-
     predictTemperature();
-}
 
-// -----------------------------------------------------------------------------
-void System::checkLedStateInEeprom() noexcept
-{
-    if (readLedStateFromEeprom())
-    {
-        myToggleTimer.start();
-        mySerial.printf("Toggle timer enabled!\n");
-    }
-}
-
-// -----------------------------------------------------------------------------
-void System::writeLedStateToEeprom() noexcept
-{ 
-    myEeprom.write(LedState::address, myToggleTimer.isEnabled());
-}
-
-// -----------------------------------------------------------------------------
-bool System::readLedStateFromEeprom() const noexcept
-{
-    uint8_t state{};
-    return myEeprom.read(LedState::address, state) ? LedState::enabled == state : false;
+    // Restart the timer after button press.
+    myPredictTimer.restart();
 }
 
 // -----------------------------------------------------------------------------
